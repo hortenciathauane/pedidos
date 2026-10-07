@@ -1,0 +1,6 @@
+{
+  "name": "Restaurante das Irmãs - Cardápio & Recepção de Pedidos",
+  "description": "Sistema de pedidos online para clientes e painel de cozinha em tempo real para o Restaurante das Irmãs com controle de estoque.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
