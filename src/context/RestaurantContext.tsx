@@ -36,6 +36,7 @@ interface RestaurantContextType {
   addItem: (item: Omit<ItemEstoque, 'id'>) => void;
   deleteItem: (itemId: string) => void;
   updateKitchenSettings: (newSettings: Partial<KitchenSettings>) => void;
+  clearAllItems: () => void;
   isSistersLoggedIn: boolean;
   loginSisters: (email: string, pass: string) => boolean;
   logoutSisters: () => void;
@@ -49,11 +50,11 @@ interface RestaurantContextType {
 const RestaurantContext = createContext<RestaurantContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
-  ITEMS: 'restaurante_irmas_items_v2',
-  ORDERS: 'restaurante_irmas_orders_v2',
-  SETTINGS: 'restaurante_irmas_settings_v2',
-  AUTH: 'restaurante_irmas_auth_v2',
-  TRACKED_ORDER: 'restaurante_irmas_tracked_order_v2'
+  ITEMS: 'restaurante_irmas_items_v3',
+  ORDERS: 'restaurante_irmas_orders_v3',
+  SETTINGS: 'restaurante_irmas_settings_v3',
+  AUTH: 'restaurante_irmas_auth_v3',
+  TRACKED_ORDER: 'restaurante_irmas_tracked_order_v3'
 };
 
 export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -425,6 +426,16 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     });
   }, []);
 
+  const clearAllItems = useCallback(() => {
+    setItems([]);
+    setCart([]);
+    try {
+      localStorage.setItem(STORAGE_KEYS.ITEMS, JSON.stringify([]));
+    } catch {
+      // ignore
+    }
+  }, []);
+
   // Authentication for Restaurante das Irmãs
   const normalizeEmail = (email: string) => {
     return email
@@ -515,6 +526,7 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         addItem,
         deleteItem,
         updateKitchenSettings,
+        clearAllItems,
         isSistersLoggedIn,
         loginSisters,
         logoutSisters,

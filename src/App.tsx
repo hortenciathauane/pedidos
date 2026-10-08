@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RestaurantProvider, useRestaurant } from './context/RestaurantContext';
+import { RestaurantProvider } from './context/RestaurantContext';
 import { Header } from './components/Header';
 import { KitchenBanner } from './components/KitchenBanner';
 import { CustomerMenu } from './components/CustomerMenu';
@@ -9,16 +9,10 @@ import { OrderSuccessModal } from './components/OrderSuccessModal';
 import { OrderTrackingModal } from './components/OrderTrackingModal';
 import { ProductDetailModal } from './components/ProductDetailModal';
 import { ScheduleModal } from './components/ScheduleModal';
-import { KitchenDashboard } from './components/kitchen/KitchenDashboard';
-import { KitchenLogin } from './components/kitchen/KitchenLogin';
 import { ItemEstoque, Pedido } from './types/restaurant';
-import { ChefHat, Phone, MapPin, Clock, ShieldCheck, Heart } from 'lucide-react';
+import { ChefHat, Phone, Clock, Heart, Sparkles, Bike } from 'lucide-react';
 
 function RestaurantAppContent() {
-  const { isSistersLoggedIn } = useRestaurant();
-
-  const [currentView, setCurrentView] = useState<'menu' | 'kitchen'>('menu');
-
   // Modals state
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -46,41 +40,28 @@ function RestaurantAppContent() {
       
       {/* Top Header */}
       <Header
-        currentView={currentView}
-        onNavigate={(view) => setCurrentView(view)}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenTracking={() => setIsTrackingModalOpen(true)}
         onOpenScheduleModal={() => setIsScheduleModalOpen(true)}
       />
 
-      {/* Main Content Area */}
+      {/* Main Content Area - Exclusively Customer Ordering */}
       <main className="flex-1">
-        {currentView === 'kitchen' ? (
-          // Kitchen / Back-office view
-          isSistersLoggedIn ? (
-            <KitchenDashboard />
-          ) : (
-            <KitchenLogin onBackToMenu={() => setCurrentView('menu')} />
-          )
-        ) : (
-          // Customer Digital Menu view
-          <>
-            <KitchenBanner onOpenScheduleModal={() => setIsScheduleModalOpen(true)} />
-            <CustomerMenu
-              onOpenDetails={(item) => setSelectedProduct(item)}
-              onOpenCart={() => setIsCartOpen(true)}
-              onOpenSchedule={() => setIsScheduleModalOpen(true)}
-            />
-          </>
-        )}
+        <KitchenBanner onOpenScheduleModal={() => setIsScheduleModalOpen(true)} />
+        <CustomerMenu
+          onOpenDetails={(item) => setSelectedProduct(item)}
+          onOpenCart={() => setIsCartOpen(true)}
+          onOpenSchedule={() => setIsScheduleModalOpen(true)}
+        />
       </main>
 
-      {/* Footer */}
+      {/* Customer Footer */}
       <footer className="bg-stone-950 text-stone-300 border-t border-stone-800 text-xs mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            
             {/* Brand column */}
-            <div className="md:col-span-2 space-y-3">
+            <div className="space-y-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-10 h-10 rounded-xl bg-amber-700 text-white flex items-center justify-center">
                   <ChefHat className="w-6 h-6 text-amber-200" />
@@ -100,10 +81,10 @@ function RestaurantAppContent() {
               </div>
             </div>
 
-            {/* Hours & Contact */}
+            {/* Hours */}
             <div className="space-y-2">
               <h4 className="font-bold text-white uppercase text-[11px] tracking-wider mb-2">
-                Atendimento
+                Horários de Atendimento
               </h4>
               <p className="flex items-center gap-2 text-stone-400">
                 <Clock className="w-4 h-4 text-amber-500 shrink-0" />
@@ -113,36 +94,38 @@ function RestaurantAppContent() {
                 <Clock className="w-4 h-4 text-indigo-400 shrink-0" />
                 <span>Jantar: 18:30 às 23:00</span>
               </p>
-              <p className="flex items-center gap-2 text-stone-400">
-                <Phone className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span>(11) 99999-8888</span>
+              <p className="text-[11px] text-stone-500 mt-1">
+                Atendimento de Terça a Domingo.
               </p>
             </div>
 
-            {/* Sisters Access Link */}
+            {/* How to Order / Contact */}
             <div className="space-y-2">
               <h4 className="font-bold text-white uppercase text-[11px] tracking-wider mb-2">
-                Área Restrita
+                Como Funciona o Pedido
               </h4>
-              <p className="text-stone-400 text-[11px] leading-relaxed">
-                Recepção de pedidos em tempo real pela cozinha e gestão de estoque.
+              <p className="flex items-center gap-2 text-stone-400">
+                <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Sem necessidade de cadastro prévio</span>
               </p>
-              <button
-                onClick={() => setCurrentView('kitchen')}
-                className="mt-2 inline-flex items-center gap-1.5 px-3 py-2 bg-stone-800 hover:bg-stone-700 text-amber-300 font-bold rounded-xl transition text-xs"
-              >
-                <ShieldCheck className="w-4 h-4 text-amber-400" />
-                <span>Entrar como Cozinha / Irmãs</span>
-              </button>
+              <p className="flex items-center gap-2 text-stone-400">
+                <Bike className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Delivery, Balcão ou Mesa</span>
+              </p>
+              <p className="flex items-center gap-2 text-stone-400 pt-1">
+                <Phone className="w-4 h-4 text-amber-500 shrink-0" />
+                <span>WhatsApp: (11) 99999-8888</span>
+              </p>
             </div>
+
           </div>
 
           <div className="pt-6 border-t border-stone-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-stone-500 text-[11px]">
             <span>
               © {new Date().getFullYear()} Restaurante das Irmãs. Todos os direitos reservados.
             </span>
-            <span className="flex items-center gap-2">
-              <span>Cardápio Digital & KDS Cozinha • Conexão Supabase</span>
+            <span>
+              Cardápio Digital & Registro de Pedidos Online
             </span>
           </div>
         </div>
@@ -183,7 +166,6 @@ function RestaurantAppContent() {
       <ScheduleModal
         isOpen={isScheduleModalOpen}
         onClose={() => setIsScheduleModalOpen(false)}
-        onGoToSettings={() => setCurrentView('kitchen')}
       />
 
     </div>

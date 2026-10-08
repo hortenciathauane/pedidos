@@ -178,7 +178,19 @@ export const CustomerMenu: React.FC<CustomerMenuProps> = ({
 
       {/* Grid of Dishes */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-        {filteredItems.length === 0 ? (
+        {items.length === 0 ? (
+          <div className="text-center py-20 bg-white rounded-3xl border border-stone-200 p-8 shadow-xs max-w-2xl mx-auto">
+            <div className="w-16 h-16 rounded-2xl bg-amber-100/70 text-amber-800 flex items-center justify-center mx-auto mb-4 border border-amber-300">
+              <Utensils className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-serif font-bold text-stone-900">
+              Cardápio em Atualização
+            </h3>
+            <p className="text-sm text-stone-500 max-w-md mx-auto mt-2 leading-relaxed">
+              Nosso cardápio está sendo cadastrado no sistema. Assim que os pratos e bebidas forem cadastrados, eles aparecerão aqui em tempo real!
+            </p>
+          </div>
+        ) : filteredItems.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-3xl border border-stone-200 p-8">
             <Utensils className="w-12 h-12 text-stone-300 mx-auto mb-3" />
             <h3 className="text-lg font-serif font-bold text-stone-800">

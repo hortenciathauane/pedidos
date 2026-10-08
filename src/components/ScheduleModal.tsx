@@ -1,20 +1,18 @@
 import React from 'react';
-import { X, Clock, Calendar, CheckCircle2, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { X, Clock, Calendar, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { useRestaurant } from '../context/RestaurantContext';
 import { DAYS_OF_WEEK_NAMES } from '../lib/kitchenSchedule';
 
 interface ScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onGoToSettings?: () => void;
 }
 
 export const ScheduleModal: React.FC<ScheduleModalProps> = ({
   isOpen,
-  onClose,
-  onGoToSettings
+  onClose
 }) => {
-  const { kitchenSettings, kitchenStatus, isSistersLoggedIn } = useRestaurant();
+  const { kitchenSettings, kitchenStatus } = useRestaurant();
 
   if (!isOpen) return null;
 
@@ -136,22 +134,10 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
                 {kitchenSettings.mode === 'auto'
                   ? 'Automático (Horário Programado)'
                   : kitchenSettings.mode === 'force_open'
-                  ? 'Forçado Aberto pelas Irmãs'
-                  : 'Forçado Fechado (Pausa)'}
+                  ? 'Aberto'
+                  : 'Pausa'}
               </strong>
             </span>
-            {isSistersLoggedIn && onGoToSettings && (
-              <button
-                onClick={() => {
-                  onClose();
-                  onGoToSettings();
-                }}
-                className="text-amber-800 hover:text-amber-950 font-bold underline flex items-center gap-1"
-              >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                Alterar no Painel
-              </button>
-            )}
           </div>
         </div>
 

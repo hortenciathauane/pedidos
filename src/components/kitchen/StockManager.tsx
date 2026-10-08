@@ -16,7 +16,7 @@ import { ItemEstoque, CategoriaItem } from '../../types/restaurant';
 import { formatCurrency } from '../../lib/formatters';
 
 export const StockManager: React.FC = () => {
-  const { items, updateItemStock, updateItem, addItem, deleteItem } = useRestaurant();
+  const { items, updateItemStock, updateItem, addItem, deleteItem, clearAllItems } = useRestaurant();
 
   const [search, setSearch] = useState('');
   const [filterCategory, setFilterCategory] = useState<CategoriaItem | 'todos'>('todos');
@@ -90,7 +90,22 @@ export const StockManager: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          {items.length > 0 && (
+            <button
+              onClick={() => {
+                if (confirm('Tem certeza que deseja apagar todos os itens cadastrados? Esta ação deixará o estoque limpo para o outro sistema.')) {
+                  clearAllItems();
+                }
+              }}
+              className="px-3.5 py-2.5 text-xs font-bold text-rose-700 hover:text-rose-900 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition flex items-center gap-1.5"
+              title="Apagar todos os itens locais"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Limpar Todos os Itens</span>
+            </button>
+          )}
+
           <button
             onClick={() => setIsAddingNew(true)}
             className="px-4 py-2.5 bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold rounded-xl shadow-md flex items-center gap-2 transition"
@@ -170,128 +185,171 @@ export const StockManager: React.FC = () => {
         </div>
       </div>
 
-      {/* Stock Items Table */}
-      <div className="bg-white rounded-3xl border border-stone-200 shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-stone-50 border-b border-stone-200 text-stone-500 font-bold uppercase tracking-wider text-[11px]">
-              <tr>
-                <th className="py-4 px-4">Item & Categoria</th>
-                <th className="py-4 px-4">Preço (R$)</th>
-                <th className="py-4 px-4">Unidade</th>
-                <th className="py-4 px-4">Estoque Atual</th>
-                <th className="py-4 px-4">Alerta Mín.</th>
-                <th className="py-4 px-4">Status no Cardápio</th>
-                <th className="py-4 px-4 text-right">Ações</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-100">
-              {filteredItems.map((item) => {
-                const isOutOfStock = item.quantity === 0;
-                const isLowStock = !isOutOfStock && item.quantity <= item.min_stock_alert;
-
-                return (
-                  <tr key={item.id} className="hover:bg-stone-50/70 transition">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={item.image_url}
-                          alt={item.name}
-                          className="w-12 h-12 rounded-xl object-cover shrink-0 border border-stone-200"
-                        />
-                        <div>
-                          <span className="font-bold text-stone-900 block text-sm">
-                            {item.name}
-                          </span>
-                          <span className="text-[10px] uppercase font-bold text-stone-400 capitalize">
-                            {item.category} • ID: {item.id}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="py-3 px-4 font-bold text-stone-900 text-sm">
-                      {formatCurrency(item.price)}
-                    </td>
-
-                    <td className="py-3 px-4 text-stone-600 font-medium">
-                      {item.unit}
-                    </td>
-
-                    {/* Quick Adjuster Column */}
-                    <td className="py-3 px-4">
-                      <div className="inline-flex items-center bg-stone-100 border border-stone-300 rounded-xl p-1 shadow-inner">
-                        <button
-                          onClick={() => updateItemStock(item.id, item.quantity - 1)}
-                          disabled={item.quantity <= 0}
-                          className="w-7 h-7 rounded-lg bg-white hover:bg-stone-200 flex items-center justify-center font-bold text-stone-700 disabled:opacity-30 disabled:cursor-not-allowed shadow-xs transition"
-                          title="Subtrair 1 porção do estoque"
-                        >
-                          -
-                        </button>
-                        <span className="w-10 text-center font-black text-sm text-stone-900">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() => updateItemStock(item.id, item.quantity + 1)}
-                          className="w-7 h-7 rounded-lg bg-white hover:bg-stone-200 flex items-center justify-center font-bold text-stone-700 shadow-xs transition"
-                          title="Adicionar 1 porção ao estoque"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </td>
-
-                    <td className="py-3 px-4 text-stone-500 font-mono">
-                      {item.min_stock_alert} un.
-                    </td>
-
-                    <td className="py-3 px-4">
-                      {isOutOfStock ? (
-                        <span className="px-2.5 py-1 bg-stone-100 text-stone-600 rounded-full font-bold text-[11px] border border-stone-300">
-                          🔴 Esgotado
-                        </span>
-                      ) : isLowStock ? (
-                        <span className="px-2.5 py-1 bg-amber-100 text-amber-900 rounded-full font-bold text-[11px] border border-amber-300 flex items-center gap-1 w-max">
-                          <Flame className="w-3 h-3 text-amber-700" />
-                          Últimas porções ({item.quantity})
-                        </span>
-                      ) : (
-                        <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full font-bold text-[11px] border border-emerald-300">
-                          🟢 Normal ({item.quantity})
-                        </span>
-                      )}
-                    </td>
-
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          onClick={() => setEditingItem({ ...item })}
-                          className="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition"
-                          title="Editar prato"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (confirm(`Excluir o item "${item.name}" do cardápio?`)) {
-                              deleteItem(item.id);
-                            }
-                          }}
-                          className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition"
-                          title="Excluir do cardápio"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      {/* Stock Items Table or Empty State */}
+      {items.length === 0 ? (
+        <div className="bg-white rounded-3xl border border-stone-200 p-12 text-center shadow-xs">
+          <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-800 flex items-center justify-center mx-auto mb-4 border border-amber-200">
+            <PackagePlus className="w-8 h-8" />
+          </div>
+          <h3 className="font-serif font-bold text-stone-900 text-lg">
+            Nenhum item cadastrado no estoque
+          </h3>
+          <p className="text-xs text-stone-500 max-w-md mx-auto mt-1 leading-relaxed">
+            O estoque está limpo. Você pode cadastrar pratos manualmente agora ou sincronizar os itens cadastrados no seu outro sistema via Supabase.
+          </p>
+          <div className="mt-5 flex items-center justify-center gap-3">
+            <button
+              onClick={() => setIsAddingNew(true)}
+              className="px-5 py-2.5 bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Cadastrar Novo Prato / Bebida</span>
+            </button>
+          </div>
         </div>
-      </div>
+      ) : filteredItems.length === 0 ? (
+        <div className="bg-white rounded-3xl border border-stone-200 p-12 text-center shadow-xs">
+          <Search className="w-10 h-10 text-stone-300 mx-auto mb-2" />
+          <h3 className="font-serif font-bold text-stone-700 text-base">
+            Nenhum item corresponde ao filtro ou busca
+          </h3>
+          <p className="text-xs text-stone-400 mt-1">
+            Tente buscar com outro termo ou selecione a categoria "Todos".
+          </p>
+          <button
+            onClick={() => {
+              setSearch('');
+              setFilterCategory('todos');
+              setFilterLowStockOnly(false);
+            }}
+            className="mt-4 px-4 py-2 bg-stone-900 text-white text-xs font-bold rounded-xl"
+          >
+            Limpar Filtros
+          </button>
+        </div>
+      ) : (
+        <div className="bg-white rounded-3xl border border-stone-200 shadow-xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-stone-50 border-b border-stone-200 text-stone-500 font-bold uppercase tracking-wider text-[11px]">
+                <tr>
+                  <th className="py-4 px-4">Item & Categoria</th>
+                  <th className="py-4 px-4">Preço (R$)</th>
+                  <th className="py-4 px-4">Unidade</th>
+                  <th className="py-4 px-4">Estoque Atual</th>
+                  <th className="py-4 px-4">Alerta Mín.</th>
+                  <th className="py-4 px-4">Status no Cardápio</th>
+                  <th className="py-4 px-4 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-stone-100">
+                {filteredItems.map((item) => {
+                  const isOutOfStock = item.quantity === 0;
+                  const isLowStock = !isOutOfStock && item.quantity <= item.min_stock_alert;
+
+                  return (
+                    <tr key={item.id} className="hover:bg-stone-50/70 transition">
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={item.image_url}
+                            alt={item.name}
+                            className="w-12 h-12 rounded-xl object-cover shrink-0 border border-stone-200"
+                          />
+                          <div>
+                            <span className="font-bold text-stone-900 block text-sm">
+                              {item.name}
+                            </span>
+                            <span className="text-[10px] uppercase font-bold text-stone-400 capitalize">
+                              {item.category} • ID: {item.id}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="py-3 px-4 font-bold text-stone-900 text-sm">
+                        {formatCurrency(item.price)}
+                      </td>
+
+                      <td className="py-3 px-4 text-stone-600 font-medium">
+                        {item.unit}
+                      </td>
+
+                      {/* Quick Adjuster Column */}
+                      <td className="py-3 px-4">
+                        <div className="inline-flex items-center bg-stone-100 border border-stone-300 rounded-xl p-1 shadow-inner">
+                          <button
+                            onClick={() => updateItemStock(item.id, item.quantity - 1)}
+                            disabled={item.quantity <= 0}
+                            className="w-7 h-7 rounded-lg bg-white hover:bg-stone-200 flex items-center justify-center font-bold text-stone-700 disabled:opacity-30 disabled:cursor-not-allowed shadow-xs transition"
+                            title="Subtrair 1 porção do estoque"
+                          >
+                            -
+                          </button>
+                          <span className="w-10 text-center font-black text-sm text-stone-900">
+                            {item.quantity}
+                          </span>
+                          <button
+                            onClick={() => updateItemStock(item.id, item.quantity + 1)}
+                            className="w-7 h-7 rounded-lg bg-white hover:bg-stone-200 flex items-center justify-center font-bold text-stone-700 shadow-xs transition"
+                            title="Adicionar 1 porção ao estoque"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </td>
+
+                      <td className="py-3 px-4 text-stone-500 font-mono">
+                        {item.min_stock_alert} un.
+                      </td>
+
+                      <td className="py-3 px-4">
+                        {isOutOfStock ? (
+                          <span className="px-2.5 py-1 bg-stone-100 text-stone-600 rounded-full font-bold text-[11px] border border-stone-300">
+                            🔴 Esgotado
+                          </span>
+                        ) : isLowStock ? (
+                          <span className="px-2.5 py-1 bg-amber-100 text-amber-900 rounded-full font-bold text-[11px] border border-amber-300 flex items-center gap-1 w-max">
+                            <Flame className="w-3 h-3 text-amber-700" />
+                            Últimas porções ({item.quantity})
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full font-bold text-[11px] border border-emerald-300">
+                            🟢 Normal ({item.quantity})
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="py-3 px-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => setEditingItem({ ...item })}
+                            className="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition"
+                            title="Editar prato"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (confirm(`Excluir o item "${item.name}" do cardápio?`)) {
+                                deleteItem(item.id);
+                              }
+                            }}
+                            className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition"
+                            title="Excluir do cardápio"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Edit Item Modal */}
       {editingItem && (
