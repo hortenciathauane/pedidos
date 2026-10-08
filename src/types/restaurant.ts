@@ -10,6 +10,8 @@ export interface ItemEstoque {
   min_stock_alert: number;
   description: string;
   image_url: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export type PedidoStatus = 'pendente' | 'em_preparo' | 'saiu_para_entrega' | 'concluido' | 'cancelado';

@@ -9,12 +9,14 @@ interface CustomerMenuProps {
   onOpenDetails: (item: ItemEstoque) => void;
   onOpenCart: () => void;
   onOpenSchedule: () => void;
+  onOpenSupabaseModal?: () => void;
 }
 
 export const CustomerMenu: React.FC<CustomerMenuProps> = ({
   onOpenDetails,
   onOpenCart,
-  onOpenSchedule
+  onOpenSchedule,
+  onOpenSupabaseModal
 }) => {
   const { items, cartCount, cartTotal, kitchenStatus } = useRestaurant();
 
@@ -187,8 +189,18 @@ export const CustomerMenu: React.FC<CustomerMenuProps> = ({
               Cardápio em Atualização
             </h3>
             <p className="text-sm text-stone-500 max-w-md mx-auto mt-2 leading-relaxed">
-              Nosso cardápio está sendo cadastrado no sistema. Assim que os pratos e bebidas forem cadastrados, eles aparecerão aqui em tempo real!
+              O cardápio está conectado à tabela <strong className="text-stone-800">itens_estoque</strong> do seu banco. Assim que você cadastrar os pratos no outro sistema via n8n, eles aparecerão aqui instantaneamente!
             </p>
+            {onOpenSupabaseModal && (
+              <div className="mt-5 flex items-center justify-center gap-3">
+                <button
+                  onClick={onOpenSupabaseModal}
+                  className="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs"
+                >
+                  <span>Conectar / Verificar Chaves do Supabase</span>
+                </button>
+              </div>
+            )}
           </div>
         ) : filteredItems.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-3xl border border-stone-200 p-8">

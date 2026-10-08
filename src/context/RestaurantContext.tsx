@@ -16,6 +16,7 @@ import {
   saveSupabaseConfig,
   getSupabaseClient
 } from '../lib/supabase';
+import { normalizeItemEstoque } from '../lib/normalizeItem';
 
 interface RestaurantContextType {
   items: ItemEstoque[];
@@ -155,19 +156,30 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, [kitchenSettings]);
 
-  // On mount or when supabaseConfig changes: fetch remote stock if configured
+  // On mount or when supabaseConfig changes: fetch remote stock and poll for updates from n8n
   useEffect(() => {
-    if (supabaseConfig.isConnected && supabaseConfig.url && supabaseConfig.anonKey) {
+    if (!supabaseConfig.url || !supabaseConfig.anonKey) return;
+
+    const fetchRemoteStock = () => {
       const client = getSupabaseClient(supabaseConfig);
-      if (client) {
-        Promise.resolve(client.from('itens_estoque').select('*')).then(({ data, error }) => {
-          if (!error && data && data.length > 0) {
-            setItems(data as ItemEstoque[]);
-          }
-        }).catch(() => {});
-      }
-    }
-  }, [supabaseConfig.isConnected, supabaseConfig.url, supabaseConfig.anonKey]);
+      if (!client) return;
+
+      Promise.resolve(client.from('itens_estoque').select('*').order('name', { ascending: true })).then(({ data, error }) => {
+        if (!error && data) {
+          const normalized = (data as Record<string, unknown>[]).map(normalizeItemEstoque);
+          setItems(normalized);
+        }
+      }).catch(() => {});
+    };
+
+    // Immediate initial fetch
+    fetchRemoteStock();
+
+    // Periodic sync every 10 seconds to detect new dishes or stock changes inserted via n8n
+    const pollInterval = setInterval(fetchRemoteStock, 10000);
+
+    return () => clearInterval(pollInterval);
+  }, [supabaseConfig.url, supabaseConfig.anonKey]);
 
   const setLatestTrackedOrder = (order: Pedido | null) => {
     setLatestTrackedOrderState(order);
@@ -332,7 +344,7 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
               const newQty = Math.max(0, currentItem.quantity - ci.quantity);
               await client
                 .from('itens_estoque')
-                .update({ quantity: newQty })
+                .update({ quantity: newQty, updated_at: new Date().toISOString() })
                 .eq('id', ci.item.id);
             }
           }
@@ -488,7 +500,8 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       }
 
       if (data && data.length > 0) {
-        setItems(data as ItemEstoque[]);
+        const normalized = (data as Record<string, unknown>[]).map(normalizeItemEstoque);
+        setItems(normalized);
         const updatedConfig = { ...supabaseConfig, isConnected: true, lastSync: new Date().toLocaleTimeString('pt-BR') };
         updateSupabaseConfig(updatedConfig);
         return { success: true, message: `Sincronizado com sucesso! ${data.length} itens recebidos do Supabase.` };
