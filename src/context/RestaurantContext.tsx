@@ -178,7 +178,20 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     // Periodic sync every 10 seconds to detect new dishes or stock changes inserted via n8n
     const pollInterval = setInterval(fetchRemoteStock, 10000);
 
-    return () => clearInterval(pollInterval);
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchRemoteStock();
+      }
+    };
+
+    window.addEventListener('focus', fetchRemoteStock);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    return () => {
+      clearInterval(pollInterval);
+      window.removeEventListener('focus', fetchRemoteStock);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
   }, [supabaseConfig.url, supabaseConfig.anonKey]);
 
   const setLatestTrackedOrder = (order: Pedido | null) => {

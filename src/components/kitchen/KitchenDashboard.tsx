@@ -26,13 +26,12 @@ import { formatCurrency, formatDateTime, formatTimeAgo } from '../../lib/formatt
 import { soundEffects } from '../../lib/audio';
 import { StockManager } from './StockManager';
 import { ScheduleManager } from './ScheduleManager';
-import { SupabaseConnection } from './SupabaseConnection';
 import { OrderComandaModal } from './OrderComandaModal';
 
-type KitchenTab = 'orders' | 'stock' | 'schedule' | 'supabase';
+type KitchenTab = 'orders' | 'stock' | 'schedule';
 
 export const KitchenDashboard: React.FC = () => {
-  const { orders, updateOrderStatus, logoutSisters, kitchenStatus, supabaseConfig } = useRestaurant();
+  const { orders, updateOrderStatus, logoutSisters, kitchenStatus } = useRestaurant();
 
   const [activeTab, setActiveTab] = useState<KitchenTab>('orders');
   const [statusFilter, setStatusFilter] = useState<PedidoStatus | 'todos'>('todos');
@@ -147,20 +146,6 @@ export const KitchenDashboard: React.FC = () => {
             <span>Testar Sino</span>
           </button>
 
-          {/* Supabase Connection Quick Badge */}
-          <button
-            onClick={() => setActiveTab('supabase')}
-            className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border ${
-              supabaseConfig.isConnected
-                ? 'bg-emerald-950 text-emerald-300 border-emerald-600/40 hover:bg-emerald-900'
-                : 'bg-stone-800 text-stone-300 border-stone-700 hover:bg-stone-700'
-            }`}
-            title="Configurar chaves do Supabase"
-          >
-            <Database className="w-3.5 h-3.5 text-emerald-400" />
-            <span>{supabaseConfig.isConnected ? 'Supabase Conectado' : 'Conectar Supabase'}</span>
-          </button>
-
           {/* Logout */}
           <button
             onClick={logoutSisters}
@@ -214,25 +199,6 @@ export const KitchenDashboard: React.FC = () => {
         >
           <Calendar className="w-4 h-4" />
           <span>Horários & Cozinha Aberta/Fechada</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('supabase')}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition flex items-center gap-2 ${
-            activeTab === 'supabase'
-              ? 'bg-amber-800 text-white shadow-md shadow-amber-900/15'
-              : 'bg-white text-stone-700 hover:bg-stone-100 border border-stone-200'
-          }`}
-        >
-          <Database className="w-4 h-4 text-emerald-600" />
-          <span>Conectar Supabase</span>
-          {supabaseConfig.isConnected ? (
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          ) : (
-            <span className="text-[10px] bg-stone-100 text-stone-600 px-1.5 py-0.5 rounded-md font-bold">
-              Chaves
-            </span>
-          )}
         </button>
       </div>
 
@@ -513,9 +479,6 @@ export const KitchenDashboard: React.FC = () => {
 
       {/* Tab: Schedule Management */}
       {activeTab === 'schedule' && <ScheduleManager />}
-
-      {/* Tab: Supabase Connection */}
-      {activeTab === 'supabase' && <SupabaseConnection />}
 
       {/* Printable Comanda Modal */}
       <OrderComandaModal

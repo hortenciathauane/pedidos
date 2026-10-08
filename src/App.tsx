@@ -9,9 +9,8 @@ import { OrderSuccessModal } from './components/OrderSuccessModal';
 import { OrderTrackingModal } from './components/OrderTrackingModal';
 import { ProductDetailModal } from './components/ProductDetailModal';
 import { ScheduleModal } from './components/ScheduleModal';
-import { SupabaseModal } from './components/SupabaseModal';
 import { ItemEstoque, Pedido } from './types/restaurant';
-import { ChefHat, Phone, Clock, Heart, Sparkles, Bike, Database } from 'lucide-react';
+import { ChefHat, Phone, Clock, Heart, Sparkles, Bike } from 'lucide-react';
 
 function RestaurantAppContent() {
   // Modals state
@@ -19,7 +18,6 @@ function RestaurantAppContent() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [isTrackingModalOpen, setIsTrackingModalOpen] = useState(false);
-  const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
   const [successOrder, setSuccessOrder] = useState<Pedido | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<ItemEstoque | null>(null);
 
@@ -54,7 +52,6 @@ function RestaurantAppContent() {
           onOpenDetails={(item) => setSelectedProduct(item)}
           onOpenCart={() => setIsCartOpen(true)}
           onOpenSchedule={() => setIsScheduleModalOpen(true)}
-          onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
         />
       </main>
 
@@ -127,17 +124,9 @@ function RestaurantAppContent() {
             <span>
               © {new Date().getFullYear()} Restaurante das Irmãs. Todos os direitos reservados.
             </span>
-            <div className="flex items-center gap-4">
-              <span>Cardápio Digital & Registro de Pedidos</span>
-              <button
-                onClick={() => setIsSupabaseModalOpen(true)}
-                className="inline-flex items-center gap-1.5 text-stone-400 hover:text-emerald-400 transition cursor-pointer font-medium"
-                title="Conectar ou verificar banco Supabase (itens_estoque)"
-              >
-                <Database className="w-3.5 h-3.5 text-emerald-500" />
-                <span>Conexão Supabase</span>
-              </button>
-            </div>
+            <span>
+              Cardápio Digital & Registro de Pedidos Online
+            </span>
           </div>
         </div>
       </footer>
@@ -177,11 +166,6 @@ function RestaurantAppContent() {
       <ScheduleModal
         isOpen={isScheduleModalOpen}
         onClose={() => setIsScheduleModalOpen(false)}
-      />
-
-      <SupabaseModal
-        isOpen={isSupabaseModalOpen}
-        onClose={() => setIsSupabaseModalOpen(false)}
       />
 
     </div>
